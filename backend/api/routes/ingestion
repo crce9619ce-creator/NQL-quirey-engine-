@@ -1,0 +1,18 @@
+from fastapi import APIRouter, File, UploadFile
+import os
+from pathlib import Path
+
+router = APIRouter()
+
+@router.post('/documents')
+async def upload_documents(files: list[UploadFile]=File(...)):
+    saved = []
+    docs_dir = Path(__file__).parents[2] / 'documents'
+    os.makedirs(docs_dir, exist_ok=True)
+    for f in files:
+        dest = os.path.join(docs_dir, f.filename)
+        with open(dest, 'wb') as out:
+            out.write(await f.read())
+        saved.append(dest)
+    # caller (main) should handle processing
+    return {'status':'ok', 'files': [os.path.basename(s) for s in saved]}
