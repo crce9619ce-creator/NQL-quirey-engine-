@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pdfminer.six
+python-docx
+sentence-transformers
+faiss-cpu
+numpy
+pydantic
+aiofiles

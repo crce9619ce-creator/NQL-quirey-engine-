@@ -1,0 +1,12 @@
+{
+  "name": "nlp-query-engine-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "serve -s build -l 3000"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}
