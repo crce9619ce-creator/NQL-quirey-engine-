@@ -1,0 +1,51 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from api.routes import ingestion, query, schema
+import os, sqlite3
+
+app = FastAPI(title='NLP Query Engine - Reorganized')
+
+app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])
+
+# ensure demo db
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+os.makedirs(DATA_DIR, exist_ok=True)
+DB_PATH = os.path.join(DATA_DIR, 'demo.db')
+
+def init_db():
+    if not os.path.exists(DB_PATH):
+        conn = sqlite3.connect(DB_PATH)
+        cur = conn.cursor()
+        cur.execute("""CREATE TABLE employees(
+            emp_id INTEGER PRIMARY KEY,
+            full_name TEXT,
+            dept TEXT,
+            position TEXT,
+            annual_salary REAL,
+            join_date TEXT,
+            skills TEXT
+        )""")
+        cur.execute("""CREATE TABLE departments(
+            dept_id INTEGER PRIMARY KEY,
+            dept_name TEXT,
+            manager TEXT
+        )""")
+        cur.execute("""INSERT INTO employees(full_name, dept, position, annual_salary, join_date, skills)
+                       VALUES
+                       ('Alice Johnson','Engineering','Senior Engineer',120000,'2023-02-10','Python;SQL;Docker'),
+                       ('Bob Smith','Engineering','Engineer',90000,'2024-01-15','Python;Java'),
+                       ('Carol Lee','HR','HR Manager',95000,'2022-07-01','interviews;onboarding')
+        """)
+        cur.execute("""INSERT INTO departments(dept_name, manager) VALUES
+                       ('Engineering','Dana White'),
+                       ('HR','Eve Black')
+        """)
+        conn.commit()
+        conn.close()
+
+init_db()
+
+# include routers
+app.include_router(ingestion.router, prefix='/api/ingest')
+app.include_router(schema.router, prefix='/api/schema')
+app.include_router(query.router, prefix='/api/query')
